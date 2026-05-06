@@ -1,0 +1,215 @@
+{% extends "base.html" %}
+{% block title %}{{ forum.name }}{% endblock %}
+
+{% block head %}
+<style>
+  .back-link {
+    font-size: 0.75rem;
+    color: var(--muted);
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 1.5rem;
+    transition: color 0.2s;
+  }
+  .back-link:hover { color: var(--accent); }
+
+  .forum-header {
+    margin-bottom: 2rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid var(--border);
+  }
+  .forum-title {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 2rem;
+    letter-spacing: -0.03em;
+    margin-bottom: 0.5rem;
+  }
+  .forum-info {
+    display: flex;
+    gap: 1.5rem;
+    font-size: 0.72rem;
+    color: var(--muted);
+    flex-wrap: wrap;
+  }
+  .forum-info strong { color: var(--accent); font-family: 'Syne', sans-serif; font-weight: 700; }
+
+  .post-form {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.25rem;
+    margin-bottom: 2rem;
+  }
+  .post-form textarea {
+    width: 100%;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px 14px;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.82rem;
+    color: var(--text);
+    outline: none;
+    resize: vertical;
+    min-height: 90px;
+    transition: border-color 0.2s;
+    line-height: 1.6;
+  }
+  .post-form textarea:focus { border-color: var(--accent); }
+  .post-form-footer {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 10px;
+  }
+
+  .posts-header {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--muted);
+    margin-bottom: 1rem;
+  }
+
+  .posts-list { display: flex; flex-direction: column; gap: 12px; }
+
+  .post-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 1.25rem;
+    transition: border-color 0.2s;
+  }
+  .post-card:hover { border-color: #333340; }
+
+  .post-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 0.75rem;
+  }
+  .post-author {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 0.82rem;
+    color: var(--accent2);
+  }
+  .post-content {
+    font-size: 0.85rem;
+    color: #ccc;
+    line-height: 1.7;
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+  .post-footer {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 1rem;
+  }
+
+  .like-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 5px 14px;
+    font-family: 'Syne', sans-serif;
+    font-weight: 600;
+    font-size: 0.75rem;
+    color: var(--muted);
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .like-btn:hover { border-color: var(--accent2); color: var(--accent2); }
+  .like-btn.liked {
+    background: rgba(255,107,53,0.1);
+    border-color: var(--accent2);
+    color: var(--accent2);
+  }
+  .like-btn .heart { font-size: 0.9rem; transition: transform 0.15s; }
+  .like-btn:active .heart { transform: scale(1.4); }
+
+  .empty-posts {
+    text-align: center;
+    padding: 3rem 2rem;
+    color: var(--muted);
+    font-size: 0.8rem;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<a class="back-link" href="/forums">← Retour aux forums</a>
+
+<div class="forum-header">
+  <div class="forum-title">{{ forum.name }}</div>
+  <div class="forum-info">
+    <span>Créé par <strong>{{ forum.creator }}</strong></span>
+    <span><strong>{{ forum.nb_visite }}</strong> visites</span>
+    <span><strong>{{ posts|length }}</strong> messages</span>
+  </div>
+</div>
+
+<div class="post-form">
+  <form method="POST" action="/forum/{{ fid }}/post">
+    <textarea name="content" placeholder="Rédigez votre message..." required></textarea>
+    <div class="post-form-footer">
+      <button class="btn btn-primary" type="submit">Publier →</button>
+    </div>
+  </form>
+</div>
+
+{% if posts %}
+<div class="posts-header">{{ posts|length }} message{{ 's' if posts|length != 1 else '' }}</div>
+<div class="posts-list">
+  {% for post in posts %}
+  <div class="post-card">
+    <div class="post-header">
+      <span class="post-author">{{ post.author }}</span>
+    </div>
+    <div class="post-content">{{ post.content }}</div>
+    <div class="post-footer">
+      <button
+        class="like-btn {{ 'liked' if post.liked else '' }}"
+        onclick="toggleLike(this, '{{ post.id }}')"
+      >
+        <span class="heart">{{ '♥' if post.liked else '♡' }}</span>
+        <span class="like-count">{{ post.likes }}</span>
+      </button>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% else %}
+<div class="empty-posts">
+  Aucun message pour le moment. Soyez le premier !
+</div>
+{% endif %}
+
+<script>
+async function toggleLike(btn, pid) {
+  btn.disabled = true;
+  try {
+    const res = await fetch(`/post/${pid}/like`, { method: 'POST' });
+    const data = await res.json();
+    const heart = btn.querySelector('.heart');
+    const count = btn.querySelector('.like-count');
+    count.textContent = data.likes;
+    if (data.liked) {
+      btn.classList.add('liked');
+      heart.textContent = '♥';
+    } else {
+      btn.classList.remove('liked');
+      heart.textContent = '♡';
+    }
+  } catch(e) { console.error(e); }
+  btn.disabled = false;
+}
+</script>
+{% endblock %}

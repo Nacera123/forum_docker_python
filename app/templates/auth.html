@@ -1,0 +1,108 @@
+{% extends "base.html" %}
+{% block title %}{{ "Connexion" if mode == "login" else "Inscription" }}{% endblock %}
+
+{% block head %}
+<style>
+  .auth-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: calc(100vh - 56px);
+    padding: 2rem 1rem;
+  }
+  .auth-brand {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 2.8rem;
+    color: var(--accent);
+    letter-spacing: -0.04em;
+    margin-bottom: 0.25rem;
+  }
+  .auth-tagline {
+    font-size: 0.75rem;
+    color: var(--muted);
+    margin-bottom: 2.5rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+  .auth-box {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 2rem;
+    width: 100%;
+    max-width: 380px;
+  }
+  .auth-title {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 1.1rem;
+    margin-bottom: 1.5rem;
+  }
+  .field { margin-bottom: 1rem; }
+  .field label {
+    display: block;
+    font-size: 0.7rem;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 6px;
+  }
+  .field input {
+    width: 100%;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 10px 14px;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.85rem;
+    color: var(--text);
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .field input:focus { border-color: var(--accent); }
+  .auth-submit { width: 100%; margin-top: 0.5rem; padding: 11px; }
+  .auth-switch {
+    text-align: center;
+    margin-top: 1.25rem;
+    font-size: 0.75rem;
+    color: var(--muted);
+  }
+  .auth-switch a { color: var(--accent); text-decoration: none; }
+  .auth-switch a:hover { text-decoration: underline; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="auth-wrap">
+  <div class="auth-brand">FORUM·APP</div>
+  <div class="auth-tagline">Partagez. Discutez. Aimez.</div>
+
+  <div class="auth-box">
+    <div class="auth-title">{{ "Bon retour 👋" if mode == "login" else "Créer un compte" }}</div>
+
+    <form method="POST">
+      <div class="field">
+        <label>Nom d'utilisateur</label>
+        <input type="text" name="username" placeholder="ex: jean_dupont" required/>
+      </div>
+      <div class="field">
+        <label>Mot de passe</label>
+        <input type="password" name="password" placeholder="••••••••" required/>
+      </div>
+      <button class="btn btn-primary auth-submit" type="submit">
+        {{ "Se connecter →" if mode == "login" else "Créer mon compte →" }}
+      </button>
+    </form>
+
+    <div class="auth-switch">
+      {% if mode == "login" %}
+        Pas encore de compte ? <a href="/register">S'inscrire</a>
+      {% else %}
+        Déjà un compte ? <a href="/login">Se connecter</a>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}

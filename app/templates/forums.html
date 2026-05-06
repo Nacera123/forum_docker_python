@@ -1,0 +1,159 @@
+{% extends "base.html" %}
+{% block title %}Forums{% endblock %}
+
+{% block head %}
+<style>
+  .page-header {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    margin-bottom: 2rem;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+  .page-title {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 2rem;
+    letter-spacing: -0.03em;
+    line-height: 1;
+  }
+  .page-title span { color: var(--accent); }
+  .page-sub { font-size: 0.75rem; color: var(--muted); margin-top: 4px; }
+
+  .new-forum-form {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    flex-wrap: wrap;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 1rem 1.25rem;
+    margin-bottom: 2rem;
+  }
+  .new-forum-form label {
+    font-size: 0.7rem;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    white-space: nowrap;
+  }
+  .new-forum-form input {
+    flex: 1;
+    min-width: 200px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 9px 14px;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.85rem;
+    color: var(--text);
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .new-forum-form input:focus { border-color: var(--accent); }
+
+  .forums-grid { display: flex; flex-direction: column; gap: 10px; }
+
+  .forum-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 1.25rem 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    text-decoration: none;
+    color: var(--text);
+    transition: all 0.2s;
+    position: relative;
+    overflow: hidden;
+  }
+  .forum-card::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 3px;
+    background: var(--border);
+    transition: background 0.2s;
+  }
+  .forum-card:hover { border-color: var(--accent); transform: translateX(4px); }
+  .forum-card:hover::before { background: var(--accent); }
+
+  .forum-name {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 1rem;
+  }
+  .forum-meta { font-size: 0.7rem; color: var(--muted); margin-top: 3px; }
+
+  .forum-stats { display: flex; gap: 1rem; align-items: center; flex-shrink: 0; }
+  .stat { text-align: right; }
+  .stat-val {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 1.1rem;
+    color: var(--accent);
+    line-height: 1;
+  }
+  .stat-label {
+    font-size: 0.65rem;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+  .stat-divider { width: 1px; height: 28px; background: var(--border); }
+
+  .empty-state {
+    text-align: center;
+    padding: 4rem 2rem;
+    color: var(--muted);
+    font-size: 0.8rem;
+  }
+  .empty-icon { font-size: 2.5rem; margin-bottom: 1rem; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <div class="page-title">Les <span>Forums</span></div>
+    <div class="page-sub">{{ forums|length }} forum{{ 's' if forums|length != 1 else '' }}</div>
+  </div>
+</div>
+
+<form class="new-forum-form" method="POST" action="/forum/new">
+  <label>+ Nouveau forum</label>
+  <input type="text" name="name" placeholder="Nom du forum..." required/>
+  <button class="btn btn-primary" type="submit">Créer</button>
+</form>
+
+<div class="forums-grid">
+  {% for forum in forums %}
+  <a class="forum-card" href="/forum/{{ forum.id }}">
+    <div>
+      <div class="forum-name">{{ forum.name }}</div>
+      <div class="forum-meta">par {{ forum.creator }}</div>
+    </div>
+    <div class="forum-stats">
+      <div class="stat">
+        <div class="stat-val">{{ forum.nb_posts }}</div>
+        <div class="stat-label">posts</div>
+      </div>
+      <div class="stat-divider"></div>
+      <div class="stat">
+        <div class="stat-val">{{ forum.nb_visite }}</div>
+        <div class="stat-label">visites</div>
+      </div>
+    </div>
+  </a>
+  {% else %}
+  <div class="empty-state">
+    <div class="empty-icon">💬</div>
+    Aucun forum pour le moment.<br>Soyez le premier à en créer un !
+  </div>
+  {% endfor %}
+</div>
+{% endblock %}
