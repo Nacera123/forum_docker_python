@@ -18,9 +18,7 @@ class Post:
             "forum_id": self.forum_id,
             "likes": self.likes
         })
-        # relation avec le forum
         r.lpush(f"forum:{self.forum_id}:posts", pid)
-        # relation avec le user
         r.sadd(f"user:{self.author}:posts", pid)
         return pid
 

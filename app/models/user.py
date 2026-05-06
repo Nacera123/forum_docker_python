@@ -7,6 +7,7 @@ class User:
     def __init__(self, username: str, password: str):
         self.username = username
         self.password = self._hash(password)
+        self.notifications = 0
 
     @staticmethod
     def _hash(password: str) -> str:
@@ -16,6 +17,7 @@ class User:
         r.hset(f"user:{self.username}", mapping={
             "username": self.username,
             "password": self.password,
+            "notifications": self.notifications
         })
         r.sadd("users", self.username)
 

@@ -18,10 +18,10 @@ def create_post(fid):
     content = request.form['content'].strip()
 
     if not content:
-        return redirect(url_for('forums.forum_detail', fid=fid))
+        return redirect(url_for('forums.forum_detail', fid=fid, from_post=True))
 
     Post(content=content, author=session['username'], forum_id=fid).save()
-    return redirect(url_for('forums.forum_detail', fid=fid))
+    return redirect(url_for('forums.forum_detail', fid=fid, from_post=True))
 
 @posts_bp.route('/post/<pid>/like', methods=['POST'])
 @login_required

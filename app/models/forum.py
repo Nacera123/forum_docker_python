@@ -25,7 +25,7 @@ class Forum:
         return r.hgetall(f"forum:{fid}") or None
 
     @staticmethod
-    def all():
+    def all(sort='desc'):
         fids = r.smembers("forums")
         forums = []
         for fid in fids:
@@ -33,6 +33,9 @@ class Forum:
             if data:
                 data["nb_posts"] = r.llen(f"forum:{fid}:posts")
                 forums.append(data)
+        # Tri par nombre de visites
+        reverse = sort == 'desc'
+        forums.sort(key=lambda f: int(f.get('nb_visite', 0)), reverse=reverse)
         return forums
 
     @staticmethod

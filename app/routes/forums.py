@@ -15,8 +15,9 @@ def login_required(f):
 @forums_bp.route('/forums')
 @login_required
 def list_forums():
-    forums = Forum.all()
-    return render_template('forums.html', forums=forums, user=session['username'])
+    sort_order = request.args.get('sort', 'desc')  # 'asc' ou 'desc'
+    forums = Forum.all(sort=sort_order)
+    return render_template('forums.html', forums=forums, user=session['username'], sort_order=sort_order)
 
 @forums_bp.route('/forum/new', methods=['POST'])
 @login_required
@@ -38,9 +39,11 @@ def forum_detail(fid):
     if not forum:
         flash('Forum introuvable.', 'error')
         return redirect(url_for('forums.list_forums'))
-
-    Forum.increment_visite(fid)
-    forum['nb_visite'] = int(forum['nb_visite']) + 1
+    
+    from_post = request.args.get('from_post', False)
+    if not from_post:
+        Forum.increment_visite(fid)
+        forum['nb_visite'] = int(forum['nb_visite']) + 1
 
     from models.post import Post
     posts = Post.find_by_forum(fid)

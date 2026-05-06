@@ -113,6 +113,27 @@
     font-size: 0.8rem;
   }
   .empty-icon { font-size: 2.5rem; margin-bottom: 1rem; }
+
+  .sort-buttons {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 1.5rem;
+  }
+  .sort-btn {
+    padding: 8px 14px;
+    font-size: 0.75rem;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--muted);
+    cursor: pointer;
+    transition: all 0.2s;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    font-weight: 600;
+  }
+  .sort-btn:hover { border-color: var(--accent); color: var(--text); }
+  .sort-btn.active { background: var(--accent); border-color: var(--accent); color: var(--bg); }
 </style>
 {% endblock %}
 
@@ -122,6 +143,11 @@
     <div class="page-title">Les <span>Forums</span></div>
     <div class="page-sub">{{ forums|length }} forum{{ 's' if forums|length != 1 else '' }}</div>
   </div>
+</div>
+
+<div class="sort-buttons">
+  <a href="/forums?sort=desc" class="sort-btn {% if sort_order == 'desc' %}active{% endif %}">📉 Visites décroissantes</a>
+  <a href="/forums?sort=asc" class="sort-btn {% if sort_order == 'asc' %}active{% endif %}">📈 Visites croissantes</a>
 </div>
 
 <form class="new-forum-form" method="POST" action="/forum/new">

@@ -6,18 +6,25 @@ services:
     volumes:
       - ./app:/app
     depends_on:
-      - instaDbRedis
+      - instadbredis
     environment:
-      - REDIS_HOST=instadbRedis
+      - REDIS_HOST=instadbredis
       - REDIS_PORT=6379
-      - REDIS_DB=06        
-
-  instaDbRedis:
+      - REDIS_DB=0
+ 
+  instadbredis:
     image: redis:7-alpine
     ports:
       - "6379:6379"
     volumes:
       - redis_data:/data
-
+ 
+  redisinsight:
+    image: redis/redisinsight:latest
+    ports:
+      - "5540:5540"
+    depends_on:
+      - instadbredis
+ 
 volumes:
   redis_data:
