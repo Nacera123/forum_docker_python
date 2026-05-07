@@ -18,6 +18,7 @@ def register():
             return render_template('auth.html', mode='register')
 
         User(username, password).save()
+        session.permanent = True  # Active le TTL Redis (24h)
         session['username'] = username
         return redirect(url_for('forums.list_forums'))
 
@@ -33,6 +34,7 @@ def login():
             flash('Identifiants incorrects.', 'error')
             return render_template('auth.html', mode='login')
 
+        session.permanent = True 
         session['username'] = username
         return redirect(url_for('forums.list_forums'))
 

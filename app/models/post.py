@@ -1,4 +1,5 @@
-from db import get_redis
+from db import get_redis, get_pubsub_client
+import json
 
 r = get_redis()
 
@@ -20,6 +21,24 @@ class Post:
         })
         r.lpush(f"forum:{self.forum_id}:posts", pid)
         r.sadd(f"user:{self.author}:posts", pid)
+        
+        # Publier la notification sur Pub/Sub
+        notification = {
+            "post_id": pid,
+            "forum_id": self.forum_id,
+            "author": self.author,
+            "content": self.content[:50] + "..." if len(self.content) > 50 else self.content
+        }
+        pubsub_client = get_pubsub_client()
+        pubsub_client.publish(f"forum:{self.forum_id}:new_post", json.dumps(notification))
+        
+        # Aussi stocker dans une queue pour polling
+        r.lpush(f"forum:{self.forum_id}:new_posts_queue", json.dumps(notification))
+        r.ltrim(f"forum:{self.forum_id}:new_posts_queue", 0, 9)  # Garder les 10 derniers
+        
+        # Marquer comme non lu pour tous les autres utilisateurs
+        Post.add_unread_for_all_users(self.forum_id, str(pid), self.author)
+        
         return pid
 
     @staticmethod
@@ -60,3 +79,22 @@ class Post:
     @staticmethod
     def get_likes(pid: str) -> int:
         return int(r.hget(f"post:{pid}", "likes") or 0)
+
+    @staticmethod
+    def get_unread_count(forum_id: str, username: str) -> int:
+        """Compte les posts non lus dans un forum pour un utilisateur"""
+        unread = r.llen(f"forum:{forum_id}:new_posts_queue:unread:{username}")
+        return unread
+
+    @staticmethod
+    def mark_forum_as_read(forum_id: str, username: str):
+        """Marque tous les posts d'un forum comme lus pour un utilisateur"""
+        r.delete(f"forum:{forum_id}:new_posts_queue:unread:{username}")
+
+    @staticmethod
+    def add_unread_for_all_users(forum_id: str, post_id: str, excluding_user: str):
+        """Ajoute un post non lu pour tous les utilisateurs sauf l'auteur"""
+        all_users = r.smembers("users")
+        for username in all_users:
+            if username != excluding_user:
+                r.lpush(f"forum:{forum_id}:new_posts_queue:unread:{username}", post_id)

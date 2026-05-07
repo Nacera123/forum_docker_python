@@ -1,5 +1,6 @@
 from flask import Blueprint, render_template, request, redirect, url_for, session, flash
 from models.forum import Forum
+from models.post import Post
 
 forums_bp = Blueprint('forums', __name__)
 
@@ -17,6 +18,11 @@ def login_required(f):
 def list_forums():
     sort_order = request.args.get('sort', 'desc')  # 'asc' ou 'desc'
     forums = Forum.all(sort=sort_order)
+    
+    # Ajouter le nombre de posts non lus pour chaque forum
+    for forum in forums:
+        forum['unread_count'] = Post.get_unread_count(forum['id'], session['username'])
+    
     return render_template('forums.html', forums=forums, user=session['username'], sort_order=sort_order)
 
 @forums_bp.route('/forum/new', methods=['POST'])
@@ -45,9 +51,11 @@ def forum_detail(fid):
         Forum.increment_visite(fid)
         forum['nb_visite'] = int(forum['nb_visite']) + 1
 
-    from models.post import Post
     posts = Post.find_by_forum(fid)
     for post in posts:
         post['liked'] = Post.is_liked_by(post['id'], session['username'])
+    
+    # Marquer les posts comme lus
+    Post.mark_forum_as_read(fid, session['username'])
 
     return render_template('forum.html', forum=forum, fid=fid, posts=posts, user=session['username'])
